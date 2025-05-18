@@ -15,12 +15,12 @@ def plot_signals_interactive(
     horizontal_filtered_col="horizontal_filtered",
     horizontal_smoothed_col=None,
     n_samples=5000,
-    title="Signal Comparison",
 ):
     """Plot signals with seaborn styling."""
-    # Set seaborn style
-    sns.set_style("whitegrid")
-    sns.set_context("notebook", font_scale=1.1)
+    plt.style.use("seaborn-v0_8-white")
+    sns.set_style("white")
+    sns.set_palette("colorblind")
+    sns.set_context("paper", font_scale=1.2)
 
     n_samples = min(n_samples, len(all_data))
     data_subset = all_data.iloc[:n_samples]
@@ -33,15 +33,14 @@ def plot_signals_interactive(
 
     # Create figure with subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
-    fig.suptitle(title, fontsize=16, y=0.98)
 
     # Plot vertical signals
     ax1.set_title("Vertical Signal Comparison", fontsize=14, pad=10)
     if vertical_raw_col in data_subset.columns:
-        ax1.plot(x_axis, data_subset[vertical_raw_col], label="Raw Vertical")
+        ax1.plot(x_axis, data_subset[vertical_raw_col], label="Raw Vertical", color="C0")
 
     if vertical_filtered_col in data_subset.columns:
-        ax1.plot(x_axis, data_subset[vertical_filtered_col], label="Filtered Vertical")
+        ax1.plot(x_axis, data_subset[vertical_filtered_col], label="Filtered Vertical", color="C2")
 
     if (
         vertical_smoothed_col is not None
@@ -59,11 +58,11 @@ def plot_signals_interactive(
     # Plot horizontal signals
     ax2.set_title("Horizontal Signal Comparison", fontsize=14, pad=10)
     if horizontal_raw_col in data_subset.columns:
-        ax2.plot(x_axis, data_subset[horizontal_raw_col], label="Raw Horizontal")
+        ax2.plot(x_axis, data_subset[horizontal_raw_col], label="Raw Horizontal", color="C1")
 
     if horizontal_filtered_col in data_subset.columns:
         ax2.plot(
-            x_axis, data_subset[horizontal_filtered_col], label="Filtered Horizontal"
+            x_axis, data_subset[horizontal_filtered_col], label="Filtered Horizontal", color="C3"
         )
 
     if (
@@ -71,7 +70,7 @@ def plot_signals_interactive(
         and horizontal_smoothed_col in data_subset.columns
     ):
         ax2.plot(
-            x_axis, data_subset[horizontal_smoothed_col], label="Smoothed Horizontal"
+            x_axis, data_subset[horizontal_smoothed_col], label="Smoothed Horizontal", color="C4"
         )
 
     ax2.set_xlabel(x_title, fontsize=12)
@@ -96,10 +95,10 @@ def plot_fft_vertical_horizontal(
     participant=1,
 ):
     """Plot FFT with seaborn styling."""
-    # Set seaborn style
-    sns.set_style("whitegrid")
-    sns.set_context("notebook", font_scale=1.1)
-
+    plt.style.use("seaborn-v0_8-white")
+    sns.set_style("white")
+    sns.set_palette("colorblind")
+    sns.set_context("paper", font_scale=1.2)
     if isinstance(vertical_value, pd.Series):
         vertical_value = vertical_value.values
     if isinstance(horizontal_value, pd.Series):
@@ -142,7 +141,7 @@ def plot_fft_vertical_horizontal(
         positive_frequencies_limited,
         vertical_magnitude_limited,
         linewidth=2.5,
-        color="#1f77b4",
+        color="C0",
     )
     ax1.set_title(
         f"FFT of Vertical Signal (Centered, 0-{actual_freq_limit:.1f}Hz)",
@@ -163,7 +162,7 @@ def plot_fft_vertical_horizontal(
         positive_frequencies_limited,
         horizontal_magnitude_limited,
         linewidth=2.5,
-        color="#ff7f0e",
+        color="C1",
     )
 
     ax2.set_title(
@@ -183,7 +182,7 @@ def plot_fft_vertical_horizontal(
     # Add peak labels if requested
     if disp_peaks:
         # Function to group frequencies to nearest Hz and find peaks
-        def find_grouped_peaks(frequencies, magnitudes, n_peaks=10, min_freq=5):
+        def find_grouped_peaks(frequencies, magnitudes, n_peaks=5, min_freq=5):
             # Filter out frequencies below min_freq
             valid_mask = frequencies > min_freq
             valid_frequencies = frequencies[valid_mask]
@@ -193,7 +192,7 @@ def plot_fft_vertical_horizontal(
                 return [], [], []
 
             # Round frequencies to nearest Hz
-            rounded_freqs = np.round(valid_frequencies)
+            rounded_freqs = np.round(valid_frequencies / 10)
 
             # Create a dictionary to store the maximum magnitude for each rounded frequency
             freq_mag_dict = {}
@@ -212,7 +211,7 @@ def plot_fft_vertical_horizontal(
             )
 
             # Get top n frequencies
-            top_freqs = sorted_freqs[:n_peaks]
+            top_freqs = sorted_freqs[:n_peaks] * 10
 
             # Get the indices and magnitudes for the top frequencies
             peak_indices = [freq_idx_dict[freq] for freq in top_freqs]
@@ -229,17 +228,17 @@ def plot_fft_vertical_horizontal(
 
             for idx, freq, mag in zip(vert_indices, vert_freqs, vert_mags):
                 if mag > 0:  # Only label non-zero peaks
-                    ax1.plot(freq, mag, "ro", markersize=8)
+                    ax1.plot(freq, mag, "ro", markersize=5)
                     ax1.annotate(
                         f"{freq:.1f} Hz",
                         xy=(freq, mag),
-                        xytext=(5, 5),
+                        xytext=(15, -15),
                         textcoords="offset points",
-                        fontsize=9,
+                        fontsize=10,
                         ha="left",
                         va="bottom",
                         bbox=dict(
-                            boxstyle="round,pad=0.3", facecolor="white", alpha=0.7
+                            boxstyle="round,pad=0.1", facecolor="white", alpha=0.7
                         ),
                     )
 
@@ -251,17 +250,17 @@ def plot_fft_vertical_horizontal(
 
             for idx, freq, mag in zip(horiz_indices, horiz_freqs, horiz_mags):
                 if mag > 0:  # Only label non-zero peaks
-                    ax2.plot(freq, mag, "ro", markersize=8)
+                    ax2.plot(freq, mag, "ro", markersize=5)
                     ax2.annotate(
                         f"{freq:.1f} Hz",
                         xy=(freq, mag),
-                        xytext=(5, 5),
+                        xytext=(10, -10),
                         textcoords="offset points",
-                        fontsize=9,
+                        fontsize=10,
                         ha="left",
                         va="bottom",
                         bbox=dict(
-                            boxstyle="round,pad=0.3", facecolor="white", alpha=0.7
+                            boxstyle="round,pad=0.1", facecolor="white", alpha=0.7
                         ),
                     )
 
@@ -273,7 +272,10 @@ def plot_fft_vertical_horizontal(
 def plot_single(all_data, n_samples=5000):
     """Plot single signal with seaborn styling."""
     # Apply seaborn-style settings
-    plt.style.use("seaborn")
+    plt.style.use("seaborn-v0_8-white")
+    sns.set_style("white")
+    sns.set_palette("colorblind")
+    sns.set_context("paper", font_scale=1.2)
 
     col1_name = all_data.columns[0]
     col2_name = all_data.columns[1]
@@ -426,13 +428,13 @@ def plot_filter_response(
             cutoff = cutoff_freq
             ax1.axvline(
                 x=cutoff,
-                color="red",
+                color="C3",
                 linestyle="--",
                 linewidth=2,
                 alpha=0.8,
                 label=f"Cutoff: {cutoff:.2f} Hz",
             )
-            ax1.plot(cutoff, -3, "o", color="red", markersize=8)
+            ax1.plot(cutoff, -3, "o", color="C3", markersize=8)
             ax1.annotate(
                 "-3 dB",
                 xy=(cutoff, -3),
@@ -453,7 +455,7 @@ def plot_filter_response(
                 low, high = cutoff_freq
                 ax1.axvline(
                     x=low,
-                    color="red",
+                    color="C3",
                     linestyle="--",
                     linewidth=2,
                     alpha=0.8,
@@ -467,7 +469,7 @@ def plot_filter_response(
                     alpha=0.8,
                     label=f"Upper cutoff: {high:.2f} Hz",
                 )
-                ax1.plot([low, high], [-3, -3], "o", color="red", markersize=8)
+                ax1.plot([low, high], [-3, -3], "o", color="C3", markersize=8)
                 ax1.annotate(
                     "-3 dB",
                     xy=(low, -3),
